@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from .app.database import get_db
 from .app.auth import verify_jwt
-from .app.schemas import TestCreate
+from .app.schemas import TestCreate, TestDelete
 from .app.modals import Testlar
 from sqlalchemy.orm import Session
 
@@ -47,3 +47,15 @@ def add_test(test : TestCreate, db: Session = Depends(get_db), token_data: dict 
     db.commit()
     db.refresh(new_test)
     return {"message": "Test added successfully", "test": new_test}
+
+@app.post("/testlarim/delete/")
+def delete_test(data:TestDelete, db: Session = Depends(get_db), token_data: dict = Depends(verify_jwt)):
+    print("Token username:", token_data.get("sub"), flush=True)
+    user_id = token_data.get("user_id")
+    test = db.query(Testlar).filter(Testlar.test_id == int(data.test_id), Testlar.user_id == user_id).first()
+    if not test:
+        return {"message": "Bunday test topilmadi yoki sizga tegishli emas", 'status': 'error'}
+    
+    db.delete(test)
+    db.commit()
+    return {"message": "O'chirildi"}

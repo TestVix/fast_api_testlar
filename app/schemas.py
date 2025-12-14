@@ -5,3 +5,6 @@ class TestCreate(BaseModel):
     fan: str
     tavsif: str
     public: bool
+
+class TestDelete(BaseModel):
+    test_id: str
